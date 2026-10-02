@@ -1,0 +1,444 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#fff3f7">
+  <title>A Little Love Letter</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --rose: #d94f78;
+      --ink: #583c45;
+      --muted: #98727d;
+      --paper: rgba(255, 253, 250, 0.91);
+    }
+
+    * { box-sizing: border-box; }
+    html, body { min-height: 100%; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: #fff5f8;
+      font-family: Georgia, "Times New Roman", serif;
+      overflow-x: hidden;
+    }
+    button { font: inherit; }
+
+    .intro {
+      position: fixed;
+      z-index: 2;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      min-height: 100svh;
+      padding: 28px 22px;
+      overflow: hidden;
+      text-align: center;
+      background:
+        radial-gradient(ellipse at 50% 39%, rgba(255,255,255,.97) 0%, rgba(255,255,255,.68) 28%, transparent 64%),
+        radial-gradient(circle at 17% 78%, rgba(255,210,224,.47), transparent 34%),
+        linear-gradient(145deg, #fff8fa 2%, #fff0f5 55%, #ffe7ef 100%);
+      transition: opacity .65s ease, transform .85s cubic-bezier(.2,.8,.2,1), visibility 0s linear .68s;
+    }
+    .intro::before,
+    .intro::after {
+      position: absolute;
+      z-index: -1;
+      content: "";
+      width: min(54vw, 460px);
+      aspect-ratio: 1;
+      border: 1px solid rgba(221, 112, 145, .12);
+      border-radius: 50%;
+      pointer-events: none;
+    }
+    .intro::before { transform: translate(-31%, 24%) scale(1.22); }
+    .intro::after { transform: translate(39%, -26%) scale(.86); }
+
+    .intro-content {
+      width: min(100%, 560px);
+      position: relative;
+      animation: arrive .9s both;
+    }
+    .eyebrow {
+      margin: 0 0 17px;
+      color: #b77789;
+      font-family: Arial, sans-serif;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .28em;
+      text-transform: uppercase;
+    }
+    .intro h1 {
+      margin: 0;
+      color: #5b3b46;
+      font-size: clamp(2.45rem, 7vw, 4.35rem);
+      font-weight: 400;
+      letter-spacing: -.045em;
+      line-height: 1.08;
+    }
+    .intro-copy {
+      margin: 17px auto 30px;
+      color: #987680;
+      font-size: clamp(15px, 2.5vw, 17px);
+      line-height: 1.75;
+    }
+    .open-button {
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      padding: 0;
+      border: 0;
+      color: var(--rose);
+      background: transparent;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .envelope-halo {
+      display: grid;
+      width: 144px;
+      height: 144px;
+      place-items: center;
+      border: 1px solid rgba(219, 106, 140, .23);
+      border-radius: 50%;
+      background: rgba(255,255,255,.47);
+      box-shadow: 0 12px 42px rgba(207, 94, 131, .12), inset 0 0 0 8px rgba(255,255,255,.28);
+      transition: transform .28s ease, box-shadow .28s ease, background .28s ease;
+      animation: soft-pulse 3s ease-in-out infinite;
+    }
+    .open-button:hover .envelope-halo,
+    .open-button:focus-visible .envelope-halo {
+      transform: translateY(-5px) scale(1.035);
+      background: rgba(255,255,255,.8);
+      box-shadow: 0 18px 48px rgba(207, 94, 131, .2), inset 0 0 0 8px rgba(255,255,255,.48);
+    }
+    .open-button:focus-visible { outline: none; }
+    .open-button:focus-visible .envelope-halo { outline: 2px solid #ca547c; outline-offset: 5px; }
+    .envelope-halo img {
+      display: block;
+      width: 90px;
+      height: 90px;
+      object-fit: contain;
+      image-rendering: pixelated;
+    }
+    .tap-label {
+      display: inline-flex;
+      max-width: calc(100vw - 44px);
+      min-height: 29px;
+      align-items: center;
+      justify-content: center;
+      font-family: Arial, sans-serif;
+      font-size: clamp(16px, 4.8vw, 24px);
+      font-weight: 800;
+      letter-spacing: .02em;
+      line-height: 1.2;
+      text-align: center;
+      transition: opacity .18s ease, transform .18s ease;
+    }
+
+    .tap-label.is-changing {
+      opacity: 0;
+      transform: translateY(3px) scale(.98);
+    }
+    .small-note {
+      margin: 24px 0 0;
+      color: #b49aa1;
+      font-size: 13px;
+      font-style: italic;
+    }
+
+    .float-heart {
+      position: absolute;
+      color: rgba(221, 91, 131, .22);
+      user-select: none;
+      pointer-events: none;
+      animation: float 7s ease-in-out infinite;
+    }
+    .heart-one { top: 17%; left: 17%; font-size: 22px; }
+    .heart-two { top: 28%; right: 15%; font-size: 15px; animation-delay: -2.1s; }
+    .heart-three { bottom: 15%; left: 27%; font-size: 14px; animation-delay: -4s; }
+    .heart-four { right: 22%; bottom: 19%; font-size: 23px; animation-delay: -1.2s; }
+
+    .letter-screen {
+      position: fixed;
+      z-index: 1;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100svh;
+      padding: clamp(20px, 5vh, 54px) 18px;
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      visibility: hidden;
+      opacity: 0;
+      background-image:
+        linear-gradient(135deg, rgba(255, 236, 243, .48), rgba(255, 247, 249, .31)),
+        url("pink-background.png");
+      background-size: cover;
+      background-position: center;
+      transition: opacity .75s ease, visibility 0s linear .75s;
+    }
+    .letter-screen::before {
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      content: "";
+      pointer-events: none;
+      background: radial-gradient(ellipse at center, transparent 25%, rgba(111, 43, 69, .12) 100%);
+    }
+    .letter-wrap {
+      width: min(100%, 760px);
+      margin: auto;
+      padding: 9px 0;
+      transform: translateY(22px) scale(.985);
+      transition: transform .8s cubic-bezier(.18,.76,.23,1) .1s;
+    }
+    .letter-card {
+      position: relative;
+      padding: clamp(30px, 6vw, 64px) clamp(25px, 7vw, 70px) clamp(28px, 5vw, 48px);
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,.86);
+      border-radius: 22px;
+      background: var(--paper);
+      box-shadow: 0 24px 80px rgba(117, 42, 70, .19), 0 3px 14px rgba(117,42,70,.08);
+      -webkit-backdrop-filter: blur(12px);
+      backdrop-filter: blur(12px);
+    }
+    .letter-card::before,
+    .letter-card::after {
+      position: absolute;
+      width: 100px;
+      height: 100px;
+      content: "";
+      border: 1px solid rgba(220, 127, 153, .15);
+      border-radius: 50%;
+      pointer-events: none;
+    }
+    .letter-card::before { top: -65px; left: -47px; }
+    .letter-card::after { right: -55px; bottom: -70px; width: 135px; height: 135px; }
+    .letter-kicker {
+      margin: 0 0 14px;
+      color: #bb7188;
+      font-family: Arial, sans-serif;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .26em;
+      text-align: center;
+      text-transform: uppercase;
+    }
+    .letter-title {
+      margin: 0;
+      color: #623e4a;
+      font-size: clamp(2.35rem, 7vw, 4rem);
+      font-weight: 400;
+      letter-spacing: -.045em;
+      line-height: 1.1;
+      text-align: center;
+    }
+    .divider {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 13px;
+      margin: 22px 0 27px;
+      color: #d36e8c;
+      font-size: 13px;
+    }
+    .divider::before, .divider::after {
+      width: 47px;
+      height: 1px;
+      content: "";
+      background: #e9b4c2;
+    }
+    .salutation {
+      margin: 0 0 12px;
+      color: #714b57;
+      font-size: 19px;
+      font-style: italic;
+    }
+    .letter-copy {
+      margin: 0;
+      color: #bd2858;
+      font-size: clamp(2rem, 7vw, 4rem);
+      font-weight: 800;
+      letter-spacing: .01em;
+      line-height: 1.22;
+      text-align: center;
+      overflow-wrap: anywhere;
+      text-wrap: pretty;
+    }
+    .signature {
+      position: relative;
+      z-index: 1;
+      margin: 24px 0 0;
+      color: #875b68;
+      font-size: 17px;
+      font-style: italic;
+      line-height: 1.8;
+      text-align: right;
+    }
+    .signature span {
+      display: block;
+      color: #c9577a;
+      font-size: 22px;
+      font-style: normal;
+    }
+    .back-button {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin: 19px auto 0;
+      padding: 9px 15px;
+      border: 1px solid rgba(255,255,255,.65);
+      border-radius: 999px;
+      color: #fff;
+      background: rgba(112, 47, 72, .2);
+      font-family: Arial, sans-serif;
+      font-size: 12px;
+      letter-spacing: .04em;
+      cursor: pointer;
+      transition: background .2s ease, transform .2s ease;
+    }
+    .back-button:hover { transform: translateY(-1px); background: rgba(112, 47, 72, .34); }
+    .back-button:focus-visible { outline: 2px solid white; outline-offset: 3px; }
+
+    body.is-open { overflow: hidden; }
+    body.is-open .intro {
+      visibility: hidden;
+      opacity: 0;
+      transform: scale(1.025);
+    }
+    body.is-open .letter-screen {
+      z-index: 3;
+      visibility: visible;
+      opacity: 1;
+      transition-delay: .08s, 0s;
+    }
+    body.is-open .letter-wrap { transform: translateY(0) scale(1); }
+
+    @keyframes soft-pulse {
+      0%, 100% { box-shadow: 0 12px 42px rgba(207, 94, 131, .12), inset 0 0 0 8px rgba(255,255,255,.28); }
+      50% { box-shadow: 0 15px 52px rgba(207, 94, 131, .19), inset 0 0 0 8px rgba(255,255,255,.42); }
+    }
+    @keyframes float {
+      0%, 100% { transform: translateY(0) rotate(-7deg); }
+      50% { transform: translateY(-13px) rotate(7deg); }
+    }
+    @keyframes arrive {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 520px) {
+      .intro-copy { max-width: 300px; }
+      .letter-screen { align-items: flex-start; padding-top: max(22px, env(safe-area-inset-top)); padding-bottom: max(22px, env(safe-area-inset-bottom)); }
+      .letter-card { border-radius: 18px; }
+      .divider { margin: 18px 0 22px; }
+      .letter-copy { line-height: 1.32; }
+      .float-heart { opacity: .72; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <section class="intro" aria-label="Open your letter">
+      <span class="float-heart heart-one" aria-hidden="true">♥</span>
+      <span class="float-heart heart-two" aria-hidden="true">♥</span>
+      <span class="float-heart heart-three" aria-hidden="true">♥</span>
+      <span class="float-heart heart-four" aria-hidden="true">♥</span>
+      <div class="intro-content">
+        <button class="open-button" id="openLetter" type="button" aria-controls="letterScreen">
+          <span class="envelope-halo"><img src="envelope.gif" alt=""></span>
+          <span class="tap-label" id="tapLabel">TAP MO AKO 3 TIMES!!!!!!!!!!!</span>
+        </button>
+      </div>
+    </section>
+
+    <section class="letter-screen" id="letterScreen" aria-label="Your love letter" aria-hidden="true">
+      <div class="letter-wrap">
+        <article class="letter-card">
+          <p class="letter-kicker">A little love letter</p>
+          <div class="divider" aria-hidden="true">♥</div>
+          <p class="letter-copy">PAKASALAN MO KO!!!!!!!!!!!!!<br>RAHHHHHHHHHH</p>
+        </article>
+        <button class="back-button" id="backToEnvelope" type="button">← &nbsp; Back to the envelope</button>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const openButton = document.getElementById('openLetter');
+    const backButton = document.getElementById('backToEnvelope');
+    const letterScreen = document.getElementById('letterScreen');
+    const tapLabel = document.getElementById('tapLabel');
+
+    // Background music. Browsers may block unmuted autoplay, so the first tap
+    // also acts as the user gesture that starts the music.
+    const music = new Audio('marry-you.mp3');
+    music.preload = 'auto';
+    music.loop = true;
+    music.volume = 0.22;
+
+    // Try immediately for browsers that allow autoplay.
+    music.play().catch(() => {});
+
+    const tapMessages = [
+      'KERI MO YAN ISA PA',
+      'LAPIT NA BES',
+      'AYAN NAAAAAAAAA!'
+    ];
+
+    let tapCount = 0;
+    let opening = false;
+
+    function startMusic() {
+      music.volume = 0.22;
+      music.play().catch(() => {});
+    }
+
+    function animateTapText(nextText) {
+      tapLabel.classList.add('is-changing');
+      window.setTimeout(() => {
+        tapLabel.textContent = nextText;
+        tapLabel.classList.remove('is-changing');
+      }, 120);
+    }
+
+    openButton.addEventListener('click', () => {
+      if (opening) return;
+
+      startMusic();
+      tapCount += 1;
+
+      if (tapCount < 3) {
+        animateTapText(tapMessages[tapCount - 1]);
+        return;
+      }
+
+      opening = true;
+      animateTapText(tapMessages[2]);
+
+      window.setTimeout(() => {
+        document.body.classList.add('is-open');
+        letterScreen.setAttribute('aria-hidden', 'false');
+        window.setTimeout(() => backButton.focus({ preventScroll: true }), 450);
+      }, 180);
+    });
+
+    backButton.addEventListener('click', () => {
+      document.body.classList.remove('is-open');
+      letterScreen.setAttribute('aria-hidden', 'true');
+      tapCount = 0;
+      opening = false;
+      tapLabel.textContent = 'TAP MO AKO 3 TIMES!!!!!!!!!!!';
+      openButton.focus({ preventScroll: true });
+    });
+  </script>
+</body>
+</html>
